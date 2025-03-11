@@ -8,6 +8,7 @@ import com.example.homehub.service.AddressService;
 import com.example.homehub.service.HouseService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
@@ -15,30 +16,32 @@ import static com.example.homehub.constant.EntitiesConstant.ADDRESS;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AddressServiceImpl implements AddressService {
 
     private final AddressRepository addressRepository;
 
     private final HouseService houseService;
 
-    private final org.slf4j.Logger logger =  org.slf4j.LoggerFactory.getLogger(getClass());
-
     @Override
     public Address getOne(UUID id) {
-        logger.info("GET ADDRESS WITH ID: {}", id);
+        log.info("GET ADDRESS WITH ID: {}", id);
         return addressRepository.findById(id)
-                .orElseThrow(() -> new IdNotFoundException(ADDRESS, id));
+                .orElseThrow(() -> {
+                    log.error("ADDRESS NOT FOUND WITH ID: {}", id);
+                    return new IdNotFoundException(ADDRESS, id);
+                });
     }
 
     @Override
     public List<Address> getAll() {
-        logger.info("GET ALL ADDRESSES");
+        log.info("GET ALL ADDRESSES");
         return addressRepository.findAll();
     }
 
     @Override
     public Address create(Address address) {
-        logger.info("CREATE ADDRESS");
+        log.info("CREATE ADDRESS");
         return addressRepository.save(Address.builder()
                 .id(UUID.randomUUID())
                 .country(address.getCountry())
@@ -56,7 +59,7 @@ public class AddressServiceImpl implements AddressService {
                             .city(address.getCity())
                             .street(address.getStreet())
                             .build();
-                    logger.info("UPDATE ADDRESS WITH ID: {}", id);
+                    log.info("UPDATE ADDRESS WITH ID: {}", id);
                     return addressRepository.save(updatedAddress);
                 })
                 .orElseThrow(() -> new IdNotFoundException(ADDRESS, id));
@@ -65,7 +68,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @Transactional
     public void delete(UUID id) {
-        logger.info("DELETE ADDRESS WITH ID: {}", id);
+        log.info("DELETE ADDRESS WITH ID: {}", id);
 
         List<House> houses = houseService.findAllByAddressId(id);
         if (!houses.isEmpty()) {
@@ -77,7 +80,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public void deleteAll() {
-        logger.info("DELETE ALL ADDRESSES");
+        log.info("DELETE ALL ADDRESSES");
         addressRepository.deleteAll();
     }
 

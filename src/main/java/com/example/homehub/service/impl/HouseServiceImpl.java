@@ -8,6 +8,7 @@ import com.example.homehub.service.HouseOwnersService;
 import com.example.homehub.service.HouseService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -16,37 +17,39 @@ import static com.example.homehub.constant.EntitiesConstant.HOUSE;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class HouseServiceImpl implements HouseService {
 
-    private final HouseRepository jpaHouseRepository;
+    private final HouseRepository houseRepository;
 
     private final HouseOwnersService houseOwnersService;
 
-    private final org.slf4j.Logger logger =  org.slf4j.LoggerFactory.getLogger(getClass());
-
     @Override
     public House getOne(UUID id) {
-        logger.info("GET HOUSE WITH ID: {}", id);
-        return jpaHouseRepository.findById(id)
-                .orElseThrow(() -> new IdNotFoundException(HOUSE, id));
+        log.info("GET HOUSE WITH ID: {}", id);
+        return houseRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("HOUSE NOT FOUND WITH ID: {}", id);
+                    return new IdNotFoundException(HOUSE, id);
+                });
     }
 
     @Override
     public List<House> getAll() {
-        logger.info("GET ALL ADDRESSES");
-        return jpaHouseRepository.findAll();
+        log.info("GET ALL ADDRESSES");
+        return houseRepository.findAll();
     }
 
     @Override
     public List<House> findAllByAddressId(UUID addressId) {
-        logger.info("GET HOUSE WITH ADDRESS ID: {}", addressId);
-        return jpaHouseRepository.findAllByAddressId(addressId);
+        log.info("GET HOUSE WITH ADDRESS ID: {}", addressId);
+        return houseRepository.findAllByAddressId(addressId);
     }
 
     @Override
     public House create(House house) {
-        logger.info("CREATE HOUSE");
-        return jpaHouseRepository.save(House.builder()
+        log.info("CREATE HOUSE");
+        return houseRepository.save(House.builder()
                 .id(UUID.randomUUID())
                 .number(house.getNumber())
                 .square(house.getSquare())
@@ -56,15 +59,15 @@ public class HouseServiceImpl implements HouseService {
 
     @Override
     public House update(House house, UUID id) {
-        return jpaHouseRepository.findById(id)
+        return houseRepository.findById(id)
                 .map(existingHouse -> {
                     House updatedHouse = existingHouse.toBuilder()
                             .number(house.getNumber())
                             .square(house.getSquare())
                             .address(house.getAddress())
                             .build();
-                    logger.info("UPDATE HOUSE WITH ID: {}", id);
-                    return jpaHouseRepository.save(updatedHouse);
+                    log.info("UPDATE HOUSE WITH ID: {}", id);
+                    return houseRepository.save(updatedHouse);
                 })
                 .orElseThrow(() -> new IdNotFoundException(HOUSE, id));
     }
@@ -72,23 +75,23 @@ public class HouseServiceImpl implements HouseService {
     @Override
     @Transactional
     public void delete(UUID id) {
-        logger.info("DELETE HOUSE WITH ID: {}", id);
+        log.info("DELETE HOUSE WITH ID: {}", id);
         Optional<HouseOwners> houseOwners = houseOwnersService.findHouseOwnersByHouseId(id);
         if (houseOwners.isPresent()) {
             houseOwnersService.deleteByHouseId(id);
         }
-        jpaHouseRepository.deleteById(id);
+        houseRepository.deleteById(id);
     }
 
     @Override
     public void deleteAll() {
-        logger.info("DELETE ALL HOUSES");
-        jpaHouseRepository.deleteAll();
+        log.info("DELETE ALL HOUSES");
+        houseRepository.deleteAll();
     }
 
     @Override
     public void deleteAllByAddressId(UUID addressId) {
-        logger.info("DELETE ALL HOUSES BY ADDRESS WITH ID: {}", addressId);
-        jpaHouseRepository.deleteAllByAddressId(addressId);
+        log.info("DELETE ALL HOUSES BY ADDRESS WITH ID: {}", addressId);
+        houseRepository.deleteAllByAddressId(addressId);
     }
 }

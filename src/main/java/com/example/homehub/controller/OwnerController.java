@@ -25,8 +25,8 @@ public interface OwnerController {
     @GetMapping("/{id}")
     OwnerRs getOne(@PathVariable UUID id);
 
-    @GetMapping("/{street}")
-    OwnerRs getByStreet(@PathVariable String street);
+    @GetMapping("/all/{street}")
+    List<OwnerRs> getByStreet(@PathVariable String street);
 
     @GetMapping("/property")
     List<OwnerRs> findMaleWithCarAndHouse();

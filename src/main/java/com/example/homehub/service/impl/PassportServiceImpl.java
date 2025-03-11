@@ -4,6 +4,7 @@ import com.example.homehub.entity.Passport;
 import com.example.homehub.repository.PassportRepository;
 import com.example.homehub.service.PassportService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import static com.example.homehub.constant.PassportUtilsConstant.MIN_SERIES;
 import static com.example.homehub.constant.PassportUtilsConstant.MAX_SERIES;
@@ -15,21 +16,20 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PassportServiceImpl implements PassportService {
 
     private final PassportRepository passportRepository;
 
-    private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(getClass());
-
     @Override
     public Passport getByOwnerId(UUID id) {
-        logger.info("GET PASSPORT BY OWNER");
+        log.info("GET PASSPORT BY OWNER");
         return passportRepository.getByOwnerId(id);
     }
 
     @Override
     public Passport getPassportByOwnerFirstName(String firstLetter) {
-        logger.info("GET PASSPORT BY OWNER FIRSTNAME");
+        log.info("GET PASSPORT BY OWNER FIRSTNAME");
         return passportRepository.getPassportByOwnerFirstLetter(firstLetter);
     }
 
@@ -47,7 +47,7 @@ public class PassportServiceImpl implements PassportService {
 
     @Override
     public void delete(UUID id) {
-        logger.info("DELETE PASSPORT");
+        log.info("DELETE PASSPORT");
         passportRepository.deleteById(id);
     }
 

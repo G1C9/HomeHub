@@ -1,6 +1,8 @@
 package com.example.homehub.repository.jooq;
 
 import com.example.homehub.entity.Car;
+import com.example.homehub.entity.Owner;
+import com.example.homehub.entity.Passport;
 import com.example.homehub.mapper.jooq.JooqCarMapper;
 import com.example.homehub.repository.CarRepository;
 import com.example.homehub.tables.records.CarRecord;
@@ -12,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import static com.example.homehub.Tables.CAR;
+import static com.example.homehub.Tables.OWNER;
+import static com.example.homehub.Tables.PASSPORT;
 
 @Repository
 @Profile("jooq")
@@ -23,25 +27,127 @@ public class JooqCarRepository implements CarRepository {
     private final JooqCarMapper carMapper;
 
     public Optional<Car> findById(UUID id) {
-        return dslContext.selectFrom(CAR)
+        return dslContext.select(
+                CAR.ID.as("car_id"),
+                CAR.BRAND,
+                CAR.MODEL,
+                OWNER.ID.as("owner_id"),
+                OWNER.FIRST_NAME,
+                OWNER.LAST_NAME,
+                OWNER.GENDER,
+                PASSPORT.ID.as("passport_id"),
+                PASSPORT.SERIES,
+                PASSPORT.NUMBER
+        ).from(CAR)
+                .innerJoin(OWNER).on(CAR.OWNER_ID.eq(OWNER.ID))
+                .innerJoin(PASSPORT).on(OWNER.PASSPORT_ID.eq(PASSPORT.ID))
                 .where(CAR.ID.eq(id))
                 .fetchOptional()
-                .map(carMapper::map);
+                .map(rec -> {
+                    Passport passport = Passport.builder()
+                            .id(rec.get("passport_id", UUID.class))
+                            .series(rec.get(PASSPORT.SERIES))
+                            .number(rec.get(PASSPORT.NUMBER))
+                            .build();
+
+                    Owner owner = Owner.builder()
+                            .id(rec.get("owner_id", UUID.class))
+                            .firstName(rec.get(OWNER.FIRST_NAME))
+                            .lastName(rec.get(OWNER.LAST_NAME))
+                            .gender(rec.get(OWNER.GENDER))
+                            .passport(passport)
+                            .build();
+
+                    return Car.builder()
+                            .id(rec.get("car_id", UUID.class))
+                            .brand(rec.get(CAR.BRAND))
+                            .model(rec.get(CAR.MODEL))
+                            .owner(owner)
+                            .build();
+                });
     }
 
     @Override
     public List<Car> findAllByOwnerId(UUID ownerId) {
-        return dslContext.selectFrom(CAR)
+        return dslContext.select(
+                        CAR.ID.as("car_id"),
+                        CAR.BRAND,
+                        CAR.MODEL,
+                        OWNER.ID.as("owner_id"),
+                        OWNER.FIRST_NAME,
+                        OWNER.LAST_NAME,
+                        OWNER.GENDER,
+                        PASSPORT.ID.as("passport_id"),
+                        PASSPORT.SERIES,
+                        PASSPORT.NUMBER
+                ).from(CAR)
+                .innerJoin(OWNER).on(CAR.OWNER_ID.eq(OWNER.ID))
+                .innerJoin(PASSPORT).on(OWNER.PASSPORT_ID.eq(PASSPORT.ID))
                 .where(CAR.OWNER_ID.eq(ownerId))
                 .fetch()
-                .map(carMapper::map);
+                .map(rec -> {
+                    Passport passport = Passport.builder()
+                            .id(rec.get("passport_id", UUID.class))
+                            .series(rec.get(PASSPORT.SERIES))
+                            .number(rec.get(PASSPORT.NUMBER))
+                            .build();
+
+                    Owner owner = Owner.builder()
+                            .id(rec.get("owner_id", UUID.class))
+                            .firstName(rec.get(OWNER.FIRST_NAME))
+                            .lastName(rec.get(OWNER.LAST_NAME))
+                            .gender(rec.get(OWNER.GENDER))
+                            .passport(passport)
+                            .build();
+
+                    return Car.builder()
+                            .id(rec.get("car_id", UUID.class))
+                            .brand(rec.get(CAR.BRAND))
+                            .model(rec.get(CAR.MODEL))
+                            .owner(owner)
+                            .build();
+                });
     }
 
     @Override
     public List<Car> findAll() {
-        return dslContext.selectFrom(CAR)
+        return dslContext.select(
+                        CAR.ID.as("car_id"),
+                        CAR.BRAND,
+                        CAR.MODEL,
+                        OWNER.ID.as("owner_id"),
+                        OWNER.FIRST_NAME,
+                        OWNER.LAST_NAME,
+                        OWNER.GENDER,
+                        PASSPORT.ID.as("passport_id"),
+                        PASSPORT.SERIES,
+                        PASSPORT.NUMBER
+                ).from(CAR)
+                .innerJoin(OWNER).on(CAR.OWNER_ID.eq(OWNER.ID))
+                .innerJoin(PASSPORT).on(OWNER.PASSPORT_ID.eq(PASSPORT.ID))
                 .fetch()
-                .map(carMapper::map);
+                .map(rec -> {
+                    Passport passport = Passport.builder()
+                            .id(rec.get("passport_id", UUID.class))
+                            .series(rec.get(PASSPORT.SERIES))
+                            .number(rec.get(PASSPORT.NUMBER))
+                            .build();
+
+                    Owner owner = Owner.builder()
+                            .id(rec.get("owner_id", UUID.class))
+                            .firstName(rec.get(OWNER.FIRST_NAME))
+                            .lastName(rec.get(OWNER.LAST_NAME))
+                            .gender(rec.get(OWNER.GENDER))
+                            .passport(passport)
+                            .build();
+
+                    return Car.builder()
+                            .id(rec.get("car_id", UUID.class))
+                            .brand(rec.get(CAR.BRAND))
+                            .model(rec.get(CAR.MODEL))
+                            .owner(owner)
+                            .build();
+                });
     }
 
     @Override

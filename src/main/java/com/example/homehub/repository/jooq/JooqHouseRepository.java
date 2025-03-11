@@ -1,8 +1,7 @@
 package com.example.homehub.repository.jooq;
 
-import com.example.homehub.constant.EntitiesConstant;
+import com.example.homehub.entity.Address;
 import com.example.homehub.entity.House;
-import com.example.homehub.exception.IdNotFoundException;
 import com.example.homehub.mapper.jooq.JooqHouseMapper;
 import com.example.homehub.repository.HouseRepository;
 import com.example.homehub.tables.records.HouseRecord;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import static com.example.homehub.Tables.ADDRESS;
 import static com.example.homehub.Tables.HOUSE;
 
 @Repository
@@ -26,27 +26,95 @@ public class JooqHouseRepository implements HouseRepository {
 
     @Override
     public Optional<House> findById(UUID id) {
-        return Optional.of(dslContext.selectFrom(HOUSE)
+        return dslContext.select(
+                HOUSE.ID,
+                HOUSE.NUMBER,
+                HOUSE.SQUARE,
+                ADDRESS.ID.as("address_id"),
+                ADDRESS.COUNTRY,
+                ADDRESS.CITY,
+                ADDRESS.STREET
+        ).from(HOUSE)
+                .innerJoin(ADDRESS).on(HOUSE.ADDRESS_ID.eq(ADDRESS.ID))
                 .where(HOUSE.ID.eq(id))
                 .fetchOptional()
-                .map(houseMapper::map)
-                .orElseThrow(() -> new IdNotFoundException(EntitiesConstant.HOUSE, id)));
+                .map(rec -> {
+                    Address address = Address.builder()
+                            .id(rec.get("address_id", UUID.class))
+                            .country(rec.get(ADDRESS.COUNTRY))
+                            .city(rec.get(ADDRESS.CITY))
+                            .street(rec.get(ADDRESS.STREET))
+                            .build();
+
+                    return House.builder()
+                            .id(rec.get(HOUSE.ID))
+                            .number(rec.get(HOUSE.NUMBER))
+                            .square(rec.get(HOUSE.SQUARE))
+                            .address(address)
+                            .build();
+                });
     }
 
     @Override
     public List<House> findAll() {
-        return dslContext.selectFrom(HOUSE)
+        return dslContext.select(
+                        HOUSE.ID,
+                        HOUSE.NUMBER,
+                        HOUSE.SQUARE,
+                        ADDRESS.ID.as("address_id"),
+                        ADDRESS.COUNTRY,
+                        ADDRESS.CITY,
+                        ADDRESS.STREET
+                ).from(HOUSE)
+                .innerJoin(ADDRESS).on(HOUSE.ADDRESS_ID.eq(ADDRESS.ID))
                 .fetch()
-                .map(houseMapper::map);
+                .map(rec -> {
+                    Address address = Address.builder()
+                            .id(rec.get("address_id", UUID.class))
+                            .country(rec.get(ADDRESS.COUNTRY))
+                            .city(rec.get(ADDRESS.CITY))
+                            .street(rec.get(ADDRESS.STREET))
+                            .build();
+
+                    return House.builder()
+                            .id(rec.get(HOUSE.ID))
+                            .number(rec.get(HOUSE.NUMBER))
+                            .square(rec.get(HOUSE.SQUARE))
+                            .address(address)
+                            .build();
+                });
     }
 
 
     @Override
     public List<House> findAllByAddressId(UUID addressId) {
-        return dslContext.selectFrom(HOUSE)
+        return dslContext.select(
+                        HOUSE.ID,
+                        HOUSE.NUMBER,
+                        HOUSE.SQUARE,
+                        ADDRESS.ID.as("address_id"),
+                        ADDRESS.COUNTRY,
+                        ADDRESS.CITY,
+                        ADDRESS.STREET
+                ).from(HOUSE)
+                .innerJoin(ADDRESS).on(HOUSE.ADDRESS_ID.eq(ADDRESS.ID))
                 .where(HOUSE.ADDRESS_ID.eq(addressId))
                 .fetch()
-                .map(houseMapper::map);
+                .map(rec -> {
+                    Address address = Address.builder()
+                            .id(rec.get("address_id", UUID.class))
+                            .country(rec.get(ADDRESS.COUNTRY))
+                            .city(rec.get(ADDRESS.CITY))
+                            .street(rec.get(ADDRESS.STREET))
+                            .build();
+
+                    return House.builder()
+                            .id(rec.get(HOUSE.ID))
+                            .number(rec.get(HOUSE.NUMBER))
+                            .square(rec.get(HOUSE.SQUARE))
+                            .address(address)
+                            .build();
+                });
     }
 
     @Override

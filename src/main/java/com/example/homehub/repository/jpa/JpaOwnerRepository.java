@@ -17,7 +17,7 @@ public interface JpaOwnerRepository extends JpaRepository<Owner, UUID>, OwnerRep
             "JOIN ho.house h " +
             "JOIN h.address a " +
             "WHERE a.street = :street")
-    Owner getByStreet(@Param("street") String street);
+    List<Owner> findByStreet(@Param("street") String street);
 
     @Query(value = "SELECT DISTINCT o.* FROM Owner o " +
             "JOIN Car c ON o.id = c.owner_id " +

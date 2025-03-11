@@ -24,7 +24,7 @@ public class OwnerControllerImpl implements OwnerController {
     }
 
     @Override
-    public OwnerRs getByStreet(String street) {
+    public List<OwnerRs> getByStreet(String street) {
         return ownerMapper.map(ownerService.getByStreet(street));
     }
 

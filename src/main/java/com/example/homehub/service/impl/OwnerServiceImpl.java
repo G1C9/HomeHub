@@ -12,6 +12,7 @@ import com.example.homehub.service.OwnerService;
 import com.example.homehub.service.PassportService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import static com.example.homehub.constant.EntitiesConstant.OWNER;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OwnerServiceImpl implements OwnerService {
 
     private final OwnerRepository ownerRepository;
@@ -30,18 +32,19 @@ public class OwnerServiceImpl implements OwnerService {
 
     private final HouseOwnersService houseOwnersService;
 
-    private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(getClass());
-
     @Override
     public Owner getOne(UUID id) {
-        logger.info("GET OWNER WITH ID: {}", id);
+        log.info("GET OWNER WITH ID: {}", id);
         return ownerRepository.findById(id)
-                .orElseThrow(() -> new IdNotFoundException(OWNER, id));
+                .orElseThrow(() -> {
+                    log.error("OWNER NOT FOUND WITH ID: {}", id);
+                    return new IdNotFoundException(OWNER, id);
+                });
     }
 
     @Override
-    public Owner getByStreet(String s) {
-        return ownerRepository.getByStreet(s);
+    public List<Owner> getByStreet(String s) {
+        return ownerRepository.findByStreet(s);
     }
 
     @Override
@@ -51,14 +54,14 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Override
     public List<Owner> getAll() {
-        logger.info("GET ALL OWNERS");
+        log.info("GET ALL OWNERS");
         return ownerRepository.findAll();
     }
 
     @Override
     @Transactional
     public Owner create(Owner owner) {
-        logger.info("CREATE OWNER WITH PASSPORT");
+        log.info("CREATE OWNER WITH PASSPORT");
         Passport passport = new Passport();
         passport = passportService.create(passport);
         return ownerRepository.save(Owner.builder()
@@ -80,7 +83,7 @@ public class OwnerServiceImpl implements OwnerService {
                             .gender(owner.getGender())
                             .passport(owner.getPassport())
                             .build();
-                    logger.info("UPDATE OWNER WITH ID: {}", id);
+                    log.info("UPDATE OWNER WITH ID: {}", id);
                     return ownerRepository.save(updatedOwner);
                 })
                 .orElseThrow(() -> new IdNotFoundException(OWNER, id));
@@ -89,7 +92,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     @Transactional
     public void delete(UUID id) {
-        logger.info("DELETE OWNER");
+        log.info("DELETE OWNER");
 
         Owner owner = ownerRepository.findById(id)
                 .orElseThrow(() -> new IdNotFoundException(OWNER, id));
@@ -111,7 +114,7 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Override
     public void deleteAll() {
-        logger.info("DELETE ALL OWNERS");
+        log.info("DELETE ALL OWNERS");
         ownerRepository.deleteAll();
     }
 

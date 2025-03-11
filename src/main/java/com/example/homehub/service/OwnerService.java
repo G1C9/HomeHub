@@ -11,7 +11,7 @@ public interface OwnerService {
 
     Owner getOne(UUID id);
 
-    Owner getByStreet(@Param("street") String s);
+    List<Owner> getByStreet(@Param("street") String s);
 
     List<Owner> findMaleWithCarAndHouse();
 

@@ -12,7 +12,7 @@ public interface OwnerRepository {
 
     Optional<Owner> findById(UUID id);
 
-    Owner getByStreet(@Param("street") String street);
+    List<Owner> findByStreet(@Param("street") String street);
 
     List<Owner> findMaleWithCarAndHouse();
 
